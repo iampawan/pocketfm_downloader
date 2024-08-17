@@ -1,0 +1,14 @@
+/dist/
+*.exe
+/build/
+*.spec
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.vscode/
+.idea/
+.env
+venv/
+config.ini
+app_icon.ico
