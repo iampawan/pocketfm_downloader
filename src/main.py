@@ -2,7 +2,7 @@ import os
 import argparse
 
 from download import download_episodes
-from pocketfm import fetch_pocketfm_data, save_data_to_json, get_show_name
+from pocketfm import fetch_pocketfm_data, save_data_to_json
 
 def main():
     parser = argparse.ArgumentParser(description="SLD PocketFM Downloader")

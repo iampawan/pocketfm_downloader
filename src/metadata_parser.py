@@ -1,19 +1,16 @@
 import subprocess
 import os
 from PIL import Image
-import logging
 import platform
 import shutil
-
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def convert_webp_to_jpeg(webp_image_path, jpeg_image_path):
     try:
         with Image.open(webp_image_path).convert("RGB") as image:
             image.save(jpeg_image_path, "jpeg")
-        logging.info(f"Converted '{webp_image_path}' to '{jpeg_image_path}'")
+        print(f"Converted '{webp_image_path}' to '{jpeg_image_path}'")
     except Exception as e:
-        logging.error(f"Failed to convert image '{webp_image_path}': {e}")
+        print(f"Failed to convert image '{webp_image_path}': {e}")
 
 def check_ffmpeg_installed(ffmpeg_path):
     if platform.system() == 'Windows':
@@ -63,18 +60,10 @@ def add_metadata(filepath, story_title, author_name, album_name, image_name):
         ]
         
         subprocess.run(cmd, check=True)
-        logging.info(f"Metadata and album art added for '{story_title}'")
-        '''
-        if os.name == 'nt':
-            move_cmd = ['move', output_filepath, filepath]
-        else:
-            move_cmd = ['mv', output_filepath, filepath]
-        
-        subprocess.run(move_cmd, check=True)
-        '''
+        print(f"Metadata and album art added for '{story_title}'")
         shutil.move(output_filepath, filepath)
 
     except subprocess.CalledProcessError as e:
-        logging.error(f"Failed to add metadata for '{story_title}': {e}")
+        print(f"Failed to add metadata for '{story_title}': {e}")
     except Exception as e:
-        logging.error(f"Unexpected error occurred: {e}")
+        print(f"Unexpected error occurred: {e}")

@@ -1,6 +1,6 @@
-/dist/
+*/dist/
 *.exe
-/build/
+*/build/
 *.spec
 __pycache__/
 *.pyc
@@ -12,3 +12,4 @@ __pycache__/
 venv/
 config.ini
 app_icon.ico
+version.txt

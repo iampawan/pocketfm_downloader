@@ -1,13 +1,14 @@
 import os
 import requests
 import json
+
 from metadata_parser import add_metadata, check_ffmpeg_installed, convert_webp_to_jpeg
 from pocketfm import get_show_image_url, get_show_name, get_author_name
 
 def download_episodes(json_filename, pattern, download_folder, show_id):
     os.makedirs(download_folder, exist_ok=True)
     
-    ffmpeg_path = os.path.join(os.getcwd(), 'ffmpeg')
+    ffmpeg_path = os.getcwd()
     if check_ffmpeg_installed(ffmpeg_path):
         meta=True
         image_name = f"{show_id}.webp"
@@ -48,6 +49,8 @@ def download_episodes(json_filename, pattern, download_folder, show_id):
                 try:
                     try:
                         response = requests.get(media_url.replace("low", "high"))
+                        if response.status_code == 403 or response.status_code == 404 or response.status_code == 400 or response.status_code == 500:
+                            raise requests.RequestException
                     except requests.RequestException:
                         response = requests.get(media_url)
                     response.raise_for_status()
@@ -65,7 +68,7 @@ def download_episodes(json_filename, pattern, download_folder, show_id):
         else:
             print(f"Story index {i} out of range. Skipping...")
     
-    if os.path.isfile(jpeg_path):
+    if meta:
         os.remove(jpeg_path)
     
     print("Download complete.")

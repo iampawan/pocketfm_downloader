@@ -1,7 +1,6 @@
 import json
 import requests
 import configparser
-import logging
 
 def load_access_token():
     config = configparser.ConfigParser()
@@ -9,10 +8,10 @@ def load_access_token():
         config.read('config.ini')
         return config.get('pocketfm', 'access_token')
     except (configparser.NoSectionError, configparser.NoOptionError) as e:
-        logging.error(f"Configuration error: {e}:: Defaulting to guest access.")
+        print(f"Configuration error: {e}:: Defaulting to guest access.")
         return None
     except FileNotFoundError:
-        logging.error("Configuration file 'config.ini' not found. Defaulting to guest access.")
+        print("Configuration file 'config.ini' not found. Defaulting to guest access.")
         return None
 
 def base_url():
@@ -43,6 +42,7 @@ def fetch_pocketfm_data(show_id, headers=headers(load_access_token()), base_url=
     session = requests.Session()
     curr_ptr = ''
     all_stories = []
+    stopfetch = False
     while True:
         params = {
             'show_id': show_id,
@@ -58,15 +58,24 @@ def fetch_pocketfm_data(show_id, headers=headers(load_access_token()), base_url=
                 if result:
                     first_result = result[0][0] if isinstance(result[0], list) else result[0]
                     stories = first_result.get('stories', [])
-                    filtered_stories = [
-                        {
-                            "story_title": story.get("story_title"),
-                            "story_id": story.get("story_id"),
-                            "media_url": story.get("media_url")
-                        }
-                        for story in stories
-                    ]
-                    all_stories.extend(filtered_stories)
+                    for story in stories:
+                        if not story.get("media_url"):
+                            print(f"Media URL not found for story: {story.get('story_title')}. Stopping further data fetch.")
+                            stopfetch = True
+                            break
+                    
+                        filtered_stories = [
+                            {
+                                "story_title": story.get("story_title"),
+                                "story_id": story.get("story_id"),
+                                "media_url": story.get("media_url")
+                            }
+                        ]
+                        all_stories.extend(filtered_stories)
+
+                    if stopfetch:
+                        break
+
                     curr_ptr = first_result.get('next_ptr')
                     if not curr_ptr or curr_ptr == -1:
                         break
