@@ -31,6 +31,7 @@ def main():
         download_pattern = args.pattern
         if not download_pattern:
             print(f'{YELLOW}Enter the pattern to download episodes:{RESET}')
+            print(f'{ORANGE} * -{YELLOW} Download all episodes{RESET}')
             print(f'{ORANGE} *n -{YELLOW} Download episodes before n{RESET}')
             print(f'{ORANGE} n* -{YELLOW} Download episodes after n{RESET}')
             print(f'{ORANGE} n*m -{YELLOW} Download episodes between n and m{RESET}')
