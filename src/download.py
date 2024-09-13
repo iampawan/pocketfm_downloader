@@ -28,7 +28,6 @@ def download_file_with_progress(url, filepath):
 
 def download_episodes(json_filename, pattern, download_folder, show_id):
     try:
-        makedirs(download_folder, exist_ok=True)
         ffmpeg_path = getcwd()
         if check_ffmpeg_installed(ffmpeg_path):
             meta = True
@@ -45,14 +44,14 @@ def download_episodes(json_filename, pattern, download_folder, show_id):
                 jpeg_path = image_path.replace(".webp", ".jpeg")
                 convert_webp_to_jpeg(image_path, jpeg_path)
                 remove(image_path)
+                author = get_author_name(show_id)
+                album_name = get_show_name(show_id)
             except RequestException as e:
                 print(f"{RED}Failed to download image: {e}{RESET}")
                 return
         else:
             meta = False
             print(f"{YELLOW}FFmpeg not found. Metadata embedding is not possible.{RESET}")
-        author = get_author_name(show_id)
-        album_name = get_show_name(show_id)
         with open(json_filename, 'r', encoding='utf-8') as f:
             stories = load(f)
         download_range = determine_download_range(pattern, len(stories))

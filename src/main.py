@@ -1,4 +1,4 @@
-from os import remove
+from os import remove, makedirs, path
 from argparse import ArgumentParser
 
 from download import download_episodes
@@ -22,8 +22,11 @@ def main():
             show_url = input(f"{CYAN}Enter the show URL: {RESET}")
         show_id = show_url.split("/")[-1]
         stories_data = fetch_pocketfm_data(show_id)
+        makedirs(show_id)
         if stories_data:
-            json_filename = f"{show_id}.json"
+            json_filename = f"{show_id}/{show_id}.json"
+            if path.exists(json_filename):
+                remove(json_filename)
             save_data_to_json(stories_data, json_filename)
         else:
             print(f"{RED}Failed to fetch data.{RESET}")
