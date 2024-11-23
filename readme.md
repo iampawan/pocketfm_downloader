@@ -20,6 +20,10 @@ Here is an overview of the project structure:
 ```
 pocketfm_downloader/
 │
+├── bin/                            # Contains Windows Executable Files
+│   ├── pocketfm-dl.exe             # Compiled executable
+│   └── config.ini                  # Holds the access-token of PocketFM
+│
 ├── images/                         # Contains images used in the README
 │   ├── icon.png                    # Logo image for the README
 │   └── access-token.png            # Image to show example location of access-token
@@ -28,8 +32,7 @@ pocketfm_downloader/
 │   ├── main.py                     # Main script to run the application
 │   ├── download.py                 # Contains the function to download episodes
 │   ├── pocketfm.py                 # Functions to interact with the PocketFM API
-│   ├── metadata_parser.py          # Function to add metadata
-│   └── config.ini                  # Holds the access-token of PocketFM
+│   └── metadata_parser.py          # Function to add metadata
 │
 ├── .gitignore                      # Specifies files and directories to be ignored by Git
 ├── LICENSE                         # License file for the project
@@ -42,7 +45,7 @@ If you plan on using the compiled application this is how your directory is supp
 ```
 pocketfm_downloader/
 │
-├── sldpocket.exe             # Compiled executable
+├── pocketfm-dl.exe           # Compiled executable
 └── config.ini                # Holds the access-token of PocketFM
 ```
 
@@ -90,14 +93,14 @@ Alternatively, download the precompiled executable from the [Releases](https://g
 ### Basic Usage
 
 ```bash
-sldpocket "https://pocketfm.com/show_id"
+pocketdm-dl "https://pocketfm.com/show_id"
 ```
 Downloads episodes from the specified PocketFM show. You will be prompted to enter a pattern to specify which episodes to download.
 
 ### With Pattern
 
 ```bash
-sldpocket "https://pocketfm.com/show_id" -p "*"
+pocketfm-dl "https://pocketfm.com/show_id" -p "*"
 ```
 Downloads all episodes from the specified show.
 
@@ -116,22 +119,22 @@ Downloads all episodes from the specified show.
 
 1. **Download All Episodes**:
     ```bash
-    sldpocket "https://pocketfm.com/show_id" -p "*"
+    pocketfm-dl "https://pocketfm.com/show_id" -p "*"
     ```
 
 2. **Download Episodes Before Episode 10**:
     ```bash
-    sldpocket "https://pocketfm.com/show_id" -p "*10"
+    pocketfm-dl "https://pocketfm.com/show_id" -p "*10"
     ```
 
 3. **Download Episodes After Episode 5**:
     ```bash
-    sldpocket "https://pocketfm.com/show_id" -p "5*"
+    pocketfm-dl "https://pocketfm.com/show_id" -p "5*"
     ```
 
 4. **Download a Specific Episode (e.g., Episode 3)**:
     ```bash
-    sldpocket "https://pocketfm.com/show_id" -p "3"
+    pocketfm-dl "https://pocketfm.com/show_id" -p "3"
     ```
 
 ## How It Works
@@ -140,6 +143,13 @@ Downloads all episodes from the specified show.
 2. **Pattern Matching**: Based on the specified pattern, it identifies the episodes to download.
 3. **Downloading Episodes**: The selected episodes are downloaded and saved in a folder named after the show.
 4. **Adding Metadata**: Metadata, including album art, is added to the downloaded files for a better user experience. *Requires ffmpeg installed in system*.
+
+## Warning
+
+1. **Use Responsibly**: Please use this tool responsibly and respect the content creators' rights.
+2. **Legal Disclaimer**: This tool is not affiliated with PocketFM. It is an unofficial tool created for educational purposes.
+3. **Do not distribute the downloaded content**: The downloaded content is for personal use only. Do not distribute the downloaded content without the content creator's permission.
+4. **Do not use this tool rapidly**: Using this tool rapidly can lead to a ban from PocketFM and I am not responsible for any bans.
 
 ## Audio Quality
 
@@ -150,7 +160,7 @@ Audios are directly downloaded from PocketFM, capped at **128kbps**. When higher
 To view the help message, run:
 
 ```bash
-sldpocket -h
+pocketfm-dl -h
 ```
 
 ## Contributing

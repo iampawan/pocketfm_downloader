@@ -48,7 +48,7 @@ def add_metadata(filepath, story_title, author_name, album_name, image_name):
         '-metadata', f'title={story_title}',
         '-metadata', f'artist={author_name}',
         '-metadata', f'album={album_name}',
-        '-metadata', 'album_artist=SLD!',
+        '-metadata', 'album_artist=kAdLe eSports',
         '-metadata', 'encoded_by=https://github.com/advaithsshetty/pocketfm_downloader',
         '-metadata', 'publisher=kAdLe eSports',
         '-id3v2_version', '3',

@@ -11,8 +11,7 @@ RESET = "\033[0m"
 
 def load_access_token():
     config = ConfigParser()
-    # Default access token for a throwaway account to bypass 401 error and fetch the first few episodes
-    default_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI5NDE5ODU2ZDU0NDA1YjBhOTBlNjU0NjBmMTM4NmZiNTdhNjM1MjcxIiwiYWNjZXNzX3Rva2VuIjoiYjQ0ODMxZWNjNzY4Njc4YmEwNzQxYTVkMzZmY2VlMGMwNzYxOGQ0NyIsImRldmljZS1pZCI6Ijc4OTUwM2FmYTRkYTRjNjgiLCJhdXRoX3Rva2VuIjoid2ViLWF1dGgiLCJsYXN0X2FjdGl2ZV9wbGF0Zm9ybSI6ImFuZHJvaWQiLCJsYXN0X2FjdGl2ZV9kZXZpY2VfYXBwX3ZlcnNpb25fY29kZSI6Ijg4MSIsImV4cCI6MTcyNjMwMDcxM30.tBuyKjsZG3IwWbJYAS2NEV-cLFCCVmGTcp5gU3cBl-4'
+    default_token = 'your_pocketfm_access_token'
     try:
         if not config.read('config.ini'):
             raise FileNotFoundError
@@ -23,43 +22,59 @@ def load_access_token():
         else:
             return token
     except LookupError:
-        print(f"{YELLOW}This token is of a throwaway account to bypass 401 error and contains only the first few episodes. Use your access token to access all your shows.{RESET}")
-        return token
+        print(f"{YELLOW}Please provide an access token in config.ini file to fetch all the episodes you have unlocked!{RESET}")
+        return None
     except FileNotFoundError:
-        print(f"{YELLOW}Configuration file 'config.ini' not found. Using throwaway account.{RESET}")
-        print(f"{YELLOW}Please login to PocketFM and provide your access token in the 'config.ini' file.{RESET}")
-        return default_token
+        print(f"{YELLOW}Configuration file 'config.ini' not found.{RESET}")
+        print(f"{YELLOW}Please login to PocketFM and provide your access token in the 'config.ini' file to fetch all the episodes you have unlocked!{RESET}")
+        return None
 
 access_token = load_access_token() #Using a global variable to store the access token so that  the function is not called again and again.
 
 def base_url():
     return "https://web.pocketfm.com/v2/content_api/show.get_details"
 
-def headers():
-    return {
-        'Accept': 'application/json, text/plain, */*',
-        'Accept-Encoding': 'gzip, deflate, br, zstd',
-        'Accept-Language': 'en-US,en;q=0.5',
-        'app-client': 'consumer-web',
-        'app-version': '180',
-        'Connection': 'keep-alive',
-        'device-id': 'web-auth',
-        'access-token': access_token,
-        'Host': 'web.pocketfm.com',
-        'Origin': 'https://pocketfm.com',
-        'Referer': 'https://pocketfm.com/',
-        'Sec-Fetch-Dest': 'empty',
-        'Sec-Fetch-Mode': 'cors',
-        'Sec-Fetch-Site': 'same-site'
+def headers(access_token=None):
+    headers = {
+        'accept':'application/json, text/plain, */*',
+        'accept-language':'en-RO,en;q=0.9,zh-RO;q=0.8,zh;q=0.7,en-GB;q=0.6,en-US;q=0.5',
+        'app-client':'consumer-web',
+        'app-version':'180',
+        'auth-token':'web-auth',
+        'cache-control':'no-cache',
+        'device-id':'mobile-web',
+        'dnt':'1',
+        'locale':'CA',
+        'origin':'https://pocketfm.com',
+        'platform':'web',
+        'pragma':'no-cache',
+        'priority':'u=1, i',
+        'referer':'https://pocketfm.com/',
+        'sec-ch-ua':'Google Chrome;v=131, Chromium;v=131, Not_A Brand;v=24',
+        'sec-ch-ua-mobile':'?1',
+        'sec-ch-ua-platform':'Android',
+        'sec-fetch-dest':'empty',
+        'sec-fetch-mode':'cors',
+        'sec-fetch-site':'same-site',
+        'user-agent':'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36'
     }
+    if access_token:
+        headers['access-token'] = access_token
+    return headers
 
-def fetch_pocketfm_data(show_id, headers=headers(), base_url=base_url()):
+def fetch_pocketfm_data(show_id, pattern='*', headers=headers(access_token), base_url=base_url()):
     episode_count = get_show_episodecount(show_id)
+    ptr, ptr_2 = determine_fetch_range(pattern, episode_count)
+    ptr -= ptr % 10
+    ptr_2 -= ptr_2 % 10
     session = Session()
-    curr_ptr = ''
+    curr_ptr = ptr
+    end_ptr = ptr_2
     curr_ptr_prev = ''
     all_stories = []
     while True:
+        if curr_ptr > end_ptr:
+            break
         params = {
             'show_id': show_id,
             'curr_ptr': curr_ptr,
@@ -85,7 +100,7 @@ def fetch_pocketfm_data(show_id, headers=headers(), base_url=base_url()):
                             ]
                             all_stories.extend(filtered_stories)
                         else:
-                            print(f"{RED}Media URL not found for story: {story.get('story_title')}{RESET}")
+                            print(f"{RED}Media URL not found for story: {story.get('story_title')}\n Maybe try using an account with the story unlocked?{RESET}")
                             session.close()
                             return all_stories
                     curr_ptr_prev = curr_ptr
@@ -95,8 +110,10 @@ def fetch_pocketfm_data(show_id, headers=headers(), base_url=base_url()):
                         curr_ptr = str(int(curr_ptr_prev) + 10) # Manually incrementing the pointer by 10 to fetch the next set of episodes
                         continue
                     if not curr_ptr or curr_ptr == -1:
+                        print(f"{YELLOW}Reached the end of the episode list. Exiting...{RESET}")
                         break # Break the loop if there are no more episodes to fetch
                 elif str(curr_ptr) >= str(episode_count):
+                    print(f"{YELLOW}Reached the end of the episode list. Exiting...{RESET}")
                     break # Break the loop if the current pointer is greater than or equal to the total episode count
                 else:
                     print(f"{RED}The 'result' field is not present in the response. Retrying...{RESET}") # Retry fetching data if the 'result' field is not present. PocketFM API is known to return empty responses sometimes.
@@ -113,7 +130,7 @@ def fetch_pocketfm_data(show_id, headers=headers(), base_url=base_url()):
 def response_json(show_id):
     params = {'show_id': show_id}
     try:
-        response = get(base_url(), headers=headers(), params=params)
+        response = get(base_url(), headers=headers(access_token), params=params)
         response.raise_for_status()
         return response.json()
     except RequestException as e:
@@ -177,3 +194,53 @@ def get_show_episodecount(show_id):
     except Exception as e:
         print(f"{RED}Error fetching episode count for show_id {show_id}: {e}{RESET}")
     return count
+
+def determine_fetch_range(pattern, total_stories):
+    try:
+        if pattern == '*':
+            return 0, total_stories
+        elif pattern.startswith('*'):
+            num = int(pattern[1:])
+            return 0, num
+        elif pattern.endswith('*'):
+            num = int(pattern[:-1])
+            return num - 1, total_stories
+        elif '*' in pattern:
+            parts = pattern.split('*')
+            if len(parts) != 2:
+                raise ValueError("Invalid range pattern")
+            start, end = map(int, parts)
+            return start - 1, end
+        elif pattern.isdigit():
+            start = int(pattern) - 1
+            return start, start + 1
+        else:
+            raise ValueError(f"Invalid pattern format: {pattern}")
+    except ValueError as e:
+        print(f"{RED}Invalid pattern: {pattern}. Error: {e}{RESET}")
+        return 0, total_stories
+    
+def determine_download_range(pattern, total_stories):
+    try:
+        if pattern == '*':
+            return range(total_stories)
+        elif pattern.startswith('*'):
+            num = int(pattern[1:])
+            return range(num)
+        elif pattern.endswith('*'):
+            num = int(pattern[:-1])
+            return range(num - 1, total_stories)
+        elif '*' in pattern:
+            start, end = map(int, pattern.split('*'))
+            starter = (start // 10)*10
+            start = start - starter 
+            end = end - starter
+            return range(start - 1, end)
+        elif pattern.isdigit():
+            start = int(pattern) - 1
+            return range(start, start + 1)
+        else:
+            raise ValueError
+    except ValueError:
+        print(f"{RED}Invalid pattern: {pattern}{RESET}")
+        return range(0)

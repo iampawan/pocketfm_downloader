@@ -3,7 +3,7 @@ from requests import RequestException, get
 from json import load
 from tqdm import tqdm
 
-from pocketfm import get_show_image_url, get_show_name, get_author_name
+from pocketfm import get_show_image_url, get_show_name, get_author_name,determine_download_range
 from metadata_parser import add_metadata, check_ffmpeg_installed, convert_webp_to_jpeg
 
 RED = "\033[91m"
@@ -85,28 +85,6 @@ def download_episodes(json_filename, pattern, download_folder, show_id):
         print(f"{CYAN}Download complete.{RESET}")
     except Exception as e:
         print(f"{RED}An error occurred: {e}{RESET}")
-
-def determine_download_range(pattern, total_stories):
-    try:
-        if pattern == '*':
-            return range(total_stories)
-        elif pattern.startswith('*'):
-            num = int(pattern[1:])
-            return range(num)
-        elif pattern.endswith('*'):
-            num = int(pattern[:-1])
-            return range(num - 1, total_stories)
-        elif '*' in pattern:
-            start, end = map(int, pattern.split('*'))
-            return range(start - 1, end)
-        elif pattern.isdigit():
-            start = int(pattern) - 1
-            return range(start, start + 1)
-        else:
-            raise ValueError
-    except ValueError:
-        print(f"{RED}Invalid pattern: {pattern}{RESET}")
-        return range(0)
 
 def sanitize_filename(filename):
     return "".join([c for c in filename if c.isalnum() or c in "._- "]).rstrip().replace("   ", " ").replace("  ", " ")

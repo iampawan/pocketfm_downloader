@@ -1,5 +1,5 @@
 */dist/
-*.exe
+/src/*.exe
 */build/
 *.spec
 __pycache__/
@@ -10,6 +10,7 @@ __pycache__/
 .idea/
 .env
 venv/
-config.ini
-app_icon.ico
-version.txt
+version_info.txt
+*.mp3
+src/config.ini
+*.ico
